@@ -15,7 +15,7 @@
 /****************************************************************************/
 
 
-
+Queue queue;
 char *toString(FRAME *f)
 {
     static char result[BUFSIZ];
@@ -38,7 +38,7 @@ char *toString(FRAME *f)
 
 void memory_init()
 {
-
+	initQueue(&queue);
 }
 
 

@@ -2,9 +2,6 @@
 #include "memory.h"
 #include "queue.h"
 
-
-
-
 /****************************************************************************/
 /*                                                                          */
 /*                                                                          */
@@ -16,8 +13,7 @@
 
 int compareTo(FRAME *f1, FRAME *f2);
 Queue queue;
-char *toString(FRAME *f)
-{
+char *toString(FRAME *f) {
     static char result[BUFSIZ];
 
     // For each from that is printed, print the frame number, pcb id of the
@@ -38,15 +34,11 @@ int compareTo(FRAME *f1, FRAME *f2) {
     return f1->frame_id - f2->frame_id;
 }
 
-void memory_init()
-{
+void memory_init() {
 	initQueue(&queue);
 }
 
-
-
-void reference(int logic_addr, REFER_ACTION action)
-{
+void reference(int logic_addr, REFER_ACTION action) {
     PCB *pcb = PTBR->pcb;
     if (______trace_switch) printf("Reference parameters: %d\n\n",logic_addr);
 
@@ -67,51 +59,28 @@ void reference(int logic_addr, REFER_ACTION action)
     //update the queue
     //turn page/offset into physical address
     memoryAccess(action,frameNumber,pageOffset);
-
-
 }
 
-
-
-void prepage(PCB *pcb)
-{
+void prepage(PCB *pcb) {
     return;
 }
 
+void get_page(PCB *pcb, int page_id) {
 
-int start_cost(PCB *pcb)
-{
+}
+int start_cost(PCB *pcb) {
+    return 0;
+}
+
+void deallocate(PCB *pcb) {
 
 }
 
-
-
-void deallocate(PCB *pcb)
-{
+void lock_page(IORB *iorb) {
 
 }
 
-
-
-void get_page(PCB *pcb, int page_id)
-{
+void unlock_page(IORB  *iorb) {
 
 }
-
-
-
-void lock_page(IORB *iorb)
-{
-
-}
-
-
-
-void unlock_page(IORB  *iorb)
-{
-
-}
-
-
-
 /* end of module */

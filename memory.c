@@ -14,7 +14,7 @@
 /*                                                                          */
 /****************************************************************************/
 
-
+int compareTo(FRAME *f1, FRAME *f2);
 Queue queue;
 char *toString(FRAME *f)
 {
@@ -34,7 +34,9 @@ char *toString(FRAME *f)
 
     return result;
 }
-
+int compareTo(FRAME *f1, FRAME *f2) {
+    return f1->frame_id - f2->frame_id;
+}
 
 void memory_init()
 {
@@ -49,16 +51,22 @@ void reference(int logic_addr, REFER_ACTION action)
     if (______trace_switch) printf("Reference parameters: %d\n\n",logic_addr);
 
     int pageOffset = log(PAGE_SIZE)/log(2);
-    int pageNumber = log(logic_addr)/log(2);
-    pageNumber = pageNumber - pageOffset;
-    if (______trace_switch) printf("pageNumber: %d\npageOffset %d\n",pageNumber,pageOffset);
-    if(pageNumber >= MAX_PAGE || pageOffset >= MAX_FRAME) { //Not valid pointers
+    int frameNumber = log(logic_addr)/log(2);
+    frameNumber = frameNumber - pageOffset;
+    if (______trace_switch) printf("pageNumber: %d\npageOffset %d\n",frameNumber,pageOffset);
+    if(frameNumber >= MAX_FRAME || pageOffset >= MAX_PAGE || frameNumber < 0 || pageOffset < 0) { //Not valid pointers
         Int_Vector.cause = pagefault;
         Int_Vector.pcb = pcb;
-        Int_Vector.page_id = pageNumber;
+        Int_Vector.page_id = frameNumber;
         gen_int_handler();
-
     }
+    if(action == store) {
+        if (______trace_switch) printf("Page is loaded, beginning storing\n");
+        //set dirty bit of frame to true TODO: how to get the frame?
+    }
+    //update the queue
+    //turn page/offset into physical address
+    memoryAccess(action,frameNumber,pageOffset);
 
 
 }
@@ -67,7 +75,7 @@ void reference(int logic_addr, REFER_ACTION action)
 
 void prepage(PCB *pcb)
 {
-
+    return;
 }
 
 

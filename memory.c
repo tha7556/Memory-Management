@@ -56,8 +56,9 @@ void reference(int logic_addr, REFER_ACTION action) {
         if (______trace_switch) printf("Page is loaded, beginning storing\n");
         Frame_Tbl[frameNumber].dirty = true;
     }
-    //update the queue
-    //turn page/offset into physical address
+    enqueue(queue,&Frame_Tbl[frameNumber]);
+    int physicalAddress = (frameNumber * MAX_FRAME) + pageOffset;
+    if (______trace_switch) printf("Physical Address: %d\n",physicalAddress);
     memoryAccess(action,frameNumber,pageOffset);
 }
 

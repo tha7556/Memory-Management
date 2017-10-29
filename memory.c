@@ -67,7 +67,31 @@ void prepage(PCB *pcb) {
 }
 
 void get_page(PCB *pcb, int page_id) {
-
+    FRAME *frame = NULL;
+    int i = 0;
+    while(i < MAX_FRAME) {
+        if(Frame_Tbl[i].free && Frame_Tbl[i].lock_count == 0) {
+            frame = &Frame_Tbl[i];
+            break;
+        }
+        i++;
+    }
+    if(frame == NULL) {
+        QueueNode *node = frontNode(&queue);
+        while(node != NULL) {
+            frame = node->data;
+            if(frame->lock_count == 0) {
+                break;
+            }
+            node = node->next;
+        }
+        //victim is frame hopefully
+        if(frame->dirty == true) {
+            frame->lock_count = 1;
+            siodrum(store,frame->pcb,frame->page_id,frame->frame_id);
+        }
+        //Update page_table?
+    }
 }
 int start_cost(PCB *pcb) {
     return 0;

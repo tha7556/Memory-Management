@@ -54,7 +54,7 @@ void reference(int logic_addr, REFER_ACTION action) {
     }
     if(action == store) {
         if (______trace_switch) printf("Page is loaded, beginning storing\n");
-        //set dirty bit of frame to true TODO: how to get the frame?
+        Frame_Tbl[frameNumber].dirty = true;
     }
     //update the queue
     //turn page/offset into physical address

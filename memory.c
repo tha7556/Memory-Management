@@ -67,6 +67,7 @@ void prepage(PCB *pcb) {
 }
 
 void get_page(PCB *pcb, int page_id) {
+    //Part 1
     FRAME *frame = NULL;
     int i = 0;
     while(i < MAX_FRAME) {
@@ -76,6 +77,7 @@ void get_page(PCB *pcb, int page_id) {
         }
         i++;
     }
+    //Part 2
     if(frame == NULL) {
         QueueNode *node = frontNode(&queue);
         while(node != NULL) {
@@ -90,8 +92,12 @@ void get_page(PCB *pcb, int page_id) {
             frame->lock_count = 1;
             siodrum(store,frame->pcb,frame->page_id,frame->frame_id);
         }
-        //Update page_table?
+        PAGE_ENTRY *entry = &PTBR[frame->page_id];
+        entry->valid = false;
     }
+    //Part 3:
+    //Update frame table for the frame?
+    frame->lock_count = 1;
 }
 int start_cost(PCB *pcb) {
     return 0;

@@ -90,7 +90,7 @@ void get_page(PCB *pcb, int page_id) {
         //victim is frame hopefully
         if(frame->dirty == true) {
             frame->lock_count = 1;
-            siodrum(write,frame->pcb,frame->page_id,frame->frame_id);
+            siodrum(write,pcb,page_id,frame->frame_id);
         }
         PAGE_ENTRY *entry = &PTBR[frame->page_id];
         entry->valid = false;
@@ -98,7 +98,7 @@ void get_page(PCB *pcb, int page_id) {
     //Part 3:
     Frame_Tbl[frame->frame_id] = *frame; // a
     frame->lock_count = 1; //b
-    siodrum(read,frame->pcb,frame->page_id,frame->frame_id); //c
+    siodrum(read,pcb,page_id,frame->frame_id); //c
     frame->lock_count = 0; //d
     //update page table entries for process e
     frame->dirty = false; //f

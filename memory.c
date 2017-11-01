@@ -66,7 +66,7 @@ void reference(int logic_addr, REFER_ACTION action) {
     //Part 5
     if(action == store) { //a
         if (______trace_switch) printf("Page is loaded, beginning storing\n");
-        Frame_Tbl[pageNumber].dirty = true;
+        Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id].dirty = true;
     }
     enQueue(&queue,&Frame_Tbl[pageNumber]); //b
     int physicalAddress = (pageNumber * MAX_FRAME) + pageOffset; //c

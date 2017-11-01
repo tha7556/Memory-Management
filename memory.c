@@ -97,7 +97,10 @@ void get_page(PCB *pcb, int page_id) {
     }
     //Part 3:
     //Update frame table for the frame?
-    frame->lock_count = 1;
+    frame->lock_count = 1; //b
+    siodrum(store,frame->pcb,frame->page_id,frame->frame_id); //c?
+    frame->lock_count = 0; //d
+    enQueue(&queue,frame); //g
 }
 int start_cost(PCB *pcb) {
     return 0;

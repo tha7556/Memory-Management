@@ -137,6 +137,7 @@ void lock_page(IORB *iorb) {
 }
 
 void unlock_page(IORB  *iorb) {
-
+    PAGE_ENTRY *page = &(iorb->pcb->page_tbl->page_entry[iorb->page_id]);
+    Frame_Tbl[page->frame_id].lock_count -= 1;
 }
 /* end of module */

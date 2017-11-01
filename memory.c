@@ -100,7 +100,9 @@ void get_page(PCB *pcb, int page_id) {
     frame->lock_count = 1; //b
     siodrum(read,pcb,page_id,frame->frame_id); //c
     frame->lock_count = 0; //d
-    //update page table entries for process e
+    //update page table entries for process e ????????
+    PTBR->page_entry[frame->page_id].frame_id = frame->frame_id;
+
     frame->dirty = false; //f
     enQueue(&queue,frame); //g
 }

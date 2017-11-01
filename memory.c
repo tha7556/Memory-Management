@@ -90,16 +90,18 @@ void get_page(PCB *pcb, int page_id) {
         //victim is frame hopefully
         if(frame->dirty == true) {
             frame->lock_count = 1;
-            siodrum(store,frame->pcb,frame->page_id,frame->frame_id);
+            siodrum(write,frame->pcb,frame->page_id,frame->frame_id);
         }
         PAGE_ENTRY *entry = &PTBR[frame->page_id];
         entry->valid = false;
     }
     //Part 3:
-    //Update frame table for the frame?
+    Frame_Tbl[frame->frame_id] = *frame; // a
     frame->lock_count = 1; //b
-    siodrum(store,frame->pcb,frame->page_id,frame->frame_id); //c?
+    siodrum(read,frame->pcb,frame->page_id,frame->frame_id); //c
     frame->lock_count = 0; //d
+    //update page table entries for process e
+    frame->dirty = false; //f
     enQueue(&queue,frame); //g
 }
 int start_cost(PCB *pcb) {

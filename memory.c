@@ -109,7 +109,17 @@ int start_cost(PCB *pcb) {
 }
 
 void deallocate(PCB *pcb) {
-
+    int i = 0;
+    for(i = 0; i < MAX_PAGE; i++) {
+        PAGE_ENTRY *page = &(pcb->page_tbl->page_entry[i]);
+        FRAME *frame = &Frame_Tbl[page->frame_id];
+        if(page->valid == true){
+            frame->free = true;
+            frame->pcb = NULL;
+            frame->dirty = false;
+            removeNode(&queue,findNode(&queue,frame,*compareTo));
+        }
+    }
 }
 
 void lock_page(IORB *iorb) {

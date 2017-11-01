@@ -123,7 +123,17 @@ void deallocate(PCB *pcb) {
 }
 
 void lock_page(IORB *iorb) {
-
+    PAGE_ENTRY *page = &(iorb->pcb->page_tbl->page_entry[iorb->page_id]);
+    if(!page->valid == true) {
+        Int_Vector.cause = pagefault;
+        Int_Vector.pcb = iorb->pcb;
+        Int_Vector.page_id = iorb->page_id;
+        gen_int_handler();
+    }
+    if(iorb->action == read) {
+        Frame_Tbl[page->frame_id].dirty = true;
+    }
+    Frame_Tbl[page->frame_id].lock_count += 1;
 }
 
 void unlock_page(IORB  *iorb) {

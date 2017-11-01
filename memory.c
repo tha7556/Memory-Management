@@ -66,7 +66,7 @@ void reference(int logic_addr, REFER_ACTION action) {
     //Part 5
     if(action == store) { //a
         if (______trace_switch) printf("Page is loaded, beginning storing\n");
-        Frame_Tbl[pageNumber].dirty = true;
+        Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id].dirty = true;
     }
     enQueue(&queue,&Frame_Tbl[pageNumber]); //b
     int physicalAddress = (pageNumber * MAX_FRAME) + pageOffset; //c
@@ -113,7 +113,7 @@ void get_page(PCB *pcb, int page_id) {
     }
     //Part 3:
     Frame_Tbl[frame->frame_id] = *frame; // a
-    frame->lock_count = 1; //b
+    //frame->lock_count = 1; //b
     siodrum(read,pcb,page_id,frame->frame_id); //c
     frame->lock_count = 0; //d
     //update page table entries for process e ????????

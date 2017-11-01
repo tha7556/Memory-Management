@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 #include "memory.h"
 #include "queue.h"
 
@@ -35,38 +36,53 @@ int compareTo(FRAME *f1, FRAME *f2) {
 }
 
 void memory_init() {
+    if (______trace_switch) printf("YOU ARR IN MEMORY_INIT\n");
 	initQueue(&queue);
 }
 
 void reference(int logic_addr, REFER_ACTION action) {
+    if (______trace_switch) printf("YOU ARR IN REFERENCE\n");
+    if (______trace_switch) printf("\tReference parameters: %d\n\n",logic_addr);
+    if(action == store)
+        if (______trace_switch) printf("\tACTION IS STORE");
+    if(action == load)
+        if (______trace_switch) printf("\tACTION IS LOAD");
+    //Part 1
     PCB *pcb = PTBR->pcb;
-    if (______trace_switch) printf("Reference parameters: %d\n\n",logic_addr);
-
-    int pageOffset = log(PAGE_SIZE)/log(2);
-    int frameNumber = log(logic_addr)/log(2);
-    frameNumber = frameNumber - pageOffset;
-    if (______trace_switch) printf("pageNumber: %d\npageOffset %d\n",frameNumber,pageOffset);
-    if(frameNumber >= MAX_FRAME || pageOffset >= MAX_PAGE || frameNumber < 0 || pageOffset < 0) { //Not valid pointers
+    //Part 2
+    int pageOffset = log2((double)PAGE_SIZE);
+    int pageNumber = log2((double)logic_addr);
+    if (______trace_switch) printf("\t1pageNumber: %d\n\n",pageNumber);
+    pageNumber = pageNumber - pageOffset;
+    if (______trace_switch) printf("\tpageNumber: %d\n\tpageOffset %d\n",pageNumber,pageOffset);
+    //Part 3/4
+    if(pcb->page_tbl->page_entry[pageNumber].valid == false || pageNumber >= MAX_PAGE || pageNumber < 0) { //Not valid pointers
+        if (______trace_switch) printf("MARKED AS NOT VALID ARRRR\n");
         Int_Vector.cause = pagefault;
         Int_Vector.pcb = pcb;
-        Int_Vector.page_id = frameNumber;
+        Int_Vector.page_id = pageNumber;
         gen_int_handler();
     }
-    if(action == store) {
+    //Part 5
+    if(action == store) { //a
         if (______trace_switch) printf("Page is loaded, beginning storing\n");
-        Frame_Tbl[frameNumber].dirty = true;
+        Frame_Tbl[pageNumber].dirty = true;
     }
-    enqueue(queue,&Frame_Tbl[frameNumber]);
-    int physicalAddress = (frameNumber * MAX_FRAME) + pageOffset;
-    if (______trace_switch) printf("Physical Address: %d\n",physicalAddress);
-    memoryAccess(action,frameNumber,pageOffset);
+    enQueue(&queue,&Frame_Tbl[pageNumber]); //b
+    int physicalAddress = (pageNumber * MAX_FRAME) + pageOffset; //c
+    if (______trace_switch) printf("\tPhysical Address: %d\n",physicalAddress);
+    memoryAccess(action,pageNumber,pageOffset); // d
+    if (______trace_switch) printf("YOU ARE HERRE?\n");
+
 }
 
 void prepage(PCB *pcb) {
+    if (______trace_switch) printf("YOU ARR IN PREPAGE\n");
     return;
 }
 
 void get_page(PCB *pcb, int page_id) {
+    if (______trace_switch) printf("YOU ARR IN GET_PAGE\n");
     //Part 1
     FRAME *frame = NULL;
     int i = 0;
@@ -92,7 +108,7 @@ void get_page(PCB *pcb, int page_id) {
             frame->lock_count = 1;
             siodrum(write,pcb,page_id,frame->frame_id);
         }
-        PAGE_ENTRY *entry = &PTBR[frame->page_id];
+        PAGE_ENTRY *entry = &PTBR->page_entry[frame->page_id];
         entry->valid = false;
     }
     //Part 3:
@@ -107,10 +123,12 @@ void get_page(PCB *pcb, int page_id) {
     enQueue(&queue,frame); //g
 }
 int start_cost(PCB *pcb) {
+    if (______trace_switch) printf("YOU ARR IN START_COST\n");
     return 0;
 }
 
 void deallocate(PCB *pcb) {
+    if (______trace_switch) printf("YOU ARR IN DEALLOCATE\n");
     int i = 0;
     for(i = 0; i < MAX_PAGE; i++) {
         PAGE_ENTRY *page = &(pcb->page_tbl->page_entry[i]);
@@ -125,6 +143,7 @@ void deallocate(PCB *pcb) {
 }
 
 void lock_page(IORB *iorb) {
+    if (______trace_switch) printf("YOU ARR IN LOCK_PAGE\n");
     PAGE_ENTRY *page = &(iorb->pcb->page_tbl->page_entry[iorb->page_id]);
     if(!page->valid == true) {
         Int_Vector.cause = pagefault;
@@ -139,6 +158,7 @@ void lock_page(IORB *iorb) {
 }
 
 void unlock_page(IORB  *iorb) {
+    if (______trace_switch) printf("YOU ARR IN UNLOCK_PAGE\n");
     PAGE_ENTRY *page = &(iorb->pcb->page_tbl->page_entry[iorb->page_id]);
     Frame_Tbl[page->frame_id].lock_count -= 1;
 }

@@ -42,6 +42,7 @@ void memory_init() {
 
 void reference(int logic_addr, REFER_ACTION action) {
     if (______trace_switch) printf("YOU ARR IN REFERENCE\n");
+    printQ(&queue,"HELP:\n",toString);
     if (______trace_switch) printf("\tReference parameters: %d\n\n",logic_addr);
     if(action == store)
         if (______trace_switch) printf("\tACTION IS STORE");
@@ -68,7 +69,9 @@ void reference(int logic_addr, REFER_ACTION action) {
         if (______trace_switch) printf("Page is loaded, beginning storing\n");
         Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id].dirty = true;
     }
+    printQ(&queue,"HELP:\n",toString);
     enQueue(&queue,&Frame_Tbl[pageNumber]); //b
+    printQ(&queue,"HELP:\n",toString);
     int physicalAddress = (pageNumber * MAX_FRAME) + pageOffset; //c
     if (______trace_switch) printf("\tPhysical Address: %d\n",physicalAddress);
     memoryAccess(action,pageNumber,pageOffset); // d
@@ -120,6 +123,9 @@ void get_page(PCB *pcb, int page_id) {
     PTBR->page_entry[frame->page_id].frame_id = frame->frame_id;
 
     frame->dirty = false; //f
+    printQ(&queue,"HELP:\n",toString);
+    deQueue(&queue);
+    printQ(&queue,"HELP:\n",toString);
     enQueue(&queue,frame); //g
 }
 int start_cost(PCB *pcb) {

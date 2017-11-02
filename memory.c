@@ -15,13 +15,11 @@
 int compareTo(FRAME *f1, FRAME *f2);
 Queue queue;
 char *toString(FRAME *f) {
-    if (______trace_switch) printf("YOU ARR IN TOSTRING!!!\n");
     static char result[BUFSIZ];
 
     // For each from that is printed, print the frame number, pcb id of the
     // process that owns it, the page number of the page it contains,
     // D or C if it is dirty or clean, and the lock count.
-    if (______trace_switch) printf("%d\n",f->pcb->pcb_id);
     if (f == NULL) sprintf (result, "(null) ");
     else sprintf (result, "Frame %d(pcb-%d,page-%d,%c,lock-%d) ",
                f->frame_id,
@@ -83,7 +81,6 @@ void prepage(PCB *pcb) {
 }
 
 void get_page(PCB *pcb, int page_id) {
-    if (______trace_switch) printf("YOU ARR IN GET_PAGE\n");
     //Part 1
     FRAME *frame = NULL;
     int i = 0;
@@ -119,14 +116,19 @@ void get_page(PCB *pcb, int page_id) {
     frame->lock_count = 0; //d
     //update page table entries for process e ????????
     PTBR->page_entry[frame->page_id].frame_id = frame->frame_id;
-
+    frame->pcb = pcb;
+    frame->page_id = page_id;
+    frame->pcb->page_tbl->page_entry[page_id].valid = true;
+    int boolin = 2;
+    if(frame->pcb == NULL)
+        boolin = 0;
+    else
+        boolin = 1;
+    if (______trace_switch) printf("Boolen: %d\n",boolin);
     frame->dirty = false; //f
-    printQ(&queue,"HELP:\n",*toString);
     deQueue(&queue);
-    printQ(&queue,"HELP:\n",*toString);
     enQueue(&queue,frame); //g
-    printQ(&queue,"HELP?:\n",*toString);
-    if (______trace_switch) printf("YOU FINISHED!\n");
+    printQ(&queue,"QUEUE:\n",*toString);
 
 }
 int start_cost(PCB *pcb) {

@@ -15,12 +15,13 @@
 int compareTo(FRAME *f1, FRAME *f2);
 Queue queue;
 char *toString(FRAME *f) {
+    if (______trace_switch) printf("YOU ARR IN TOSTRING!!!\n");
     static char result[BUFSIZ];
 
     // For each from that is printed, print the frame number, pcb id of the
     // process that owns it, the page number of the page it contains,
     // D or C if it is dirty or clean, and the lock count.
-
+    if (______trace_switch) printf("%d\n",f->pcb->pcb_id);
     if (f == NULL) sprintf (result, "(null) ");
     else sprintf (result, "Frame %d(pcb-%d,page-%d,%c,lock-%d) ",
                f->frame_id,
@@ -42,7 +43,6 @@ void memory_init() {
 
 void reference(int logic_addr, REFER_ACTION action) {
     if (______trace_switch) printf("YOU ARR IN REFERENCE\n");
-    printQ(&queue,"HELP:\n",toString);
     if (______trace_switch) printf("\tReference parameters: %d\n\n",logic_addr);
     if(action == store)
         if (______trace_switch) printf("\tACTION IS STORE");
@@ -51,10 +51,10 @@ void reference(int logic_addr, REFER_ACTION action) {
     //Part 1
     PCB *pcb = PTBR->pcb;
     //Part 2
-    int pageOffset = log2((double)PAGE_SIZE);
-    int pageNumber = log2((double)logic_addr);
+    if (______trace_switch) printf("\tPossible number?: %d\n\n",logic_addr/PAGE_SIZE);
+    int pageNumber = logic_addr/PAGE_SIZE;
+    int pageOffset = logic_addr % PAGE_SIZE;
     if (______trace_switch) printf("\t1pageNumber: %d\n\n",pageNumber);
-    pageNumber = pageNumber - pageOffset;
     if (______trace_switch) printf("\tpageNumber: %d\n\tpageOffset %d\n",pageNumber,pageOffset);
     //Part 3/4
     if(pcb->page_tbl->page_entry[pageNumber].valid == false || pageNumber >= MAX_PAGE || pageNumber < 0) { //Not valid pointers
@@ -69,9 +69,7 @@ void reference(int logic_addr, REFER_ACTION action) {
         if (______trace_switch) printf("Page is loaded, beginning storing\n");
         Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id].dirty = true;
     }
-    printQ(&queue,"HELP:\n",toString);
     enQueue(&queue,&Frame_Tbl[pageNumber]); //b
-    printQ(&queue,"HELP:\n",toString);
     int physicalAddress = (pageNumber * MAX_FRAME) + pageOffset; //c
     if (______trace_switch) printf("\tPhysical Address: %d\n",physicalAddress);
     memoryAccess(action,pageNumber,pageOffset); // d
@@ -123,10 +121,13 @@ void get_page(PCB *pcb, int page_id) {
     PTBR->page_entry[frame->page_id].frame_id = frame->frame_id;
 
     frame->dirty = false; //f
-    printQ(&queue,"HELP:\n",toString);
+    printQ(&queue,"HELP:\n",*toString);
     deQueue(&queue);
-    printQ(&queue,"HELP:\n",toString);
+    printQ(&queue,"HELP:\n",*toString);
     enQueue(&queue,frame); //g
+    printQ(&queue,"HELP?:\n",*toString);
+    if (______trace_switch) printf("YOU FINISHED!\n");
+
 }
 int start_cost(PCB *pcb) {
     if (______trace_switch) printf("YOU ARR IN START_COST\n");

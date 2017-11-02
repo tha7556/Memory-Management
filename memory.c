@@ -49,16 +49,16 @@ void reference(int logic_addr, REFER_ACTION action) {
     //Part 1
     PCB *pcb = PTBR->pcb;
     //Part 2
-    if (______trace_switch) printf("\tPossible number?: %d\n\n",logic_addr/PAGE_SIZE);
     int pageNumber = logic_addr/PAGE_SIZE;
     int pageOffset = logic_addr % PAGE_SIZE;
-    if (______trace_switch) printf("\t1pageNumber: %d\n\n",pageNumber);
     if (______trace_switch) printf("\tpageNumber: %d\n\tpageOffset %d\n",pageNumber,pageOffset);
     //Part 3/4
     if(pcb->page_tbl->page_entry[pageNumber].valid == false || pageNumber >= MAX_PAGE || pageNumber < 0) { //Not valid pointers
         if (______trace_switch) printf("MARKED AS NOT VALID ARRRR\n");
         Int_Vector.cause = pagefault;
+        if (______trace_switch) printf("?????????????n");
         Int_Vector.pcb = pcb;
+        if (______trace_switch) printf("???????!!!??????n");
         Int_Vector.page_id = pageNumber;
         gen_int_handler();
     }
@@ -70,7 +70,8 @@ void reference(int logic_addr, REFER_ACTION action) {
     enQueue(&queue,&Frame_Tbl[pageNumber]); //b
     int physicalAddress = (pageNumber * MAX_FRAME) + pageOffset; //c
     if (______trace_switch) printf("\tPhysical Address: %d\n",physicalAddress);
-    memoryAccess(action,pageNumber,pageOffset); // d
+    memoryAccess(action,pcb->page_tbl->page_entry[pageNumber].frame_id,pageOffset); // d
+    //printQ(&queue,"\tEMD OF REFERENCEE SRRRRR\n",*toString);
     if (______trace_switch) printf("YOU ARE HERRE?\n");
 
 }
@@ -112,23 +113,19 @@ void get_page(PCB *pcb, int page_id) {
     //Part 3:
     Frame_Tbl[frame->frame_id] = *frame; // a
     frame->lock_count = 1; //b
+    frame->free = false;
     siodrum(read,pcb,page_id,frame->frame_id); //c
     frame->lock_count = 0; //d
     //update page table entries for process e ????????
-    PTBR->page_entry[frame->page_id].frame_id = frame->frame_id;
     frame->pcb = pcb;
     frame->page_id = page_id;
+    frame->pcb->page_tbl->page_entry[frame->page_id].frame_id = frame->frame_id;
     frame->pcb->page_tbl->page_entry[page_id].valid = true;
-    int boolin = 2;
-    if(frame->pcb == NULL)
-        boolin = 0;
-    else
-        boolin = 1;
-    if (______trace_switch) printf("Boolen: %d\n",boolin);
+
     frame->dirty = false; //f
-    deQueue(&queue);
+    //deQueue(&queue);
     enQueue(&queue,frame); //g
-    printQ(&queue,"QUEUE:\n",*toString);
+    //printQ(&queue,"QUEUE:\n",*toString);
 
 }
 int start_cost(PCB *pcb) {
@@ -146,6 +143,7 @@ void deallocate(PCB *pcb) {
             frame->free = true;
             frame->pcb = NULL;
             frame->dirty = false;
+            frame->page_id = 0;
             removeNode(&queue,findNode(&queue,frame,*compareTo));
         }
     }

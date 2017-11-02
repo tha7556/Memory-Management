@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 #include "memory.h"
 #include "queue.h"
 
@@ -56,7 +57,10 @@ void reference(int logic_addr, REFER_ACTION action) {
         if (______trace_switch) printf("Page is loaded, beginning storing\n");
         Frame_Tbl[frameNumber].dirty = true;
     }
-    enqueue(queue,&Frame_Tbl[frameNumber]);
+    printQ(&queue,"1",toString);
+    deQueue(&queue);
+    printQ(&queue,"2",toString);
+    enQueue(&queue,&Frame_Tbl[frameNumber]);
     int physicalAddress = (frameNumber * MAX_FRAME) + pageOffset;
     if (______trace_switch) printf("Physical Address: %d\n",physicalAddress);
     memoryAccess(action,frameNumber,pageOffset);
@@ -92,7 +96,7 @@ void get_page(PCB *pcb, int page_id) {
             frame->lock_count = 1;
             siodrum(write,pcb,page_id,frame->frame_id);
         }
-        PAGE_ENTRY *entry = &PTBR[frame->page_id];
+        PAGE_ENTRY *entry = &PTBR->page_entry[frame->page_id];
         entry->valid = false;
     }
     //Part 3:

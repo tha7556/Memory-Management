@@ -2,6 +2,8 @@
 #include "memory.h"
 #include "queue.h"
 
+//Tyler Atkinson & Dylan Menchetti
+
 /****************************************************************************/
 /*                                                                          */
 /*                                                                          */
@@ -42,7 +44,7 @@ void reference(int logic_addr, REFER_ACTION action) {
     int pageNumber = logic_addr/PAGE_SIZE;
     int pageOffset = logic_addr % PAGE_SIZE;
 
-    if(pcb->page_tbl->page_entry[pageNumber].valid == false || pageNumber >= MAX_PAGE || pageNumber < 0) {
+    if(pcb->page_tbl->page_entry[pageNumber].valid == false) {
         Int_Vector.cause = pagefault;
         Int_Vector.pcb = pcb;
         Int_Vector.page_id = pageNumber;
@@ -51,9 +53,9 @@ void reference(int logic_addr, REFER_ACTION action) {
     if(action == store) {
         Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id].dirty = true;
     }
-    removeNode(&queue,findNode(&queue,&Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id],*compareTo));
-    enQueueSorted(&queue,&Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id],*compareTo);
-    int physicalAddress = (pageNumber * MAX_FRAME) + pageOffset;
+    removeNode(&queue,findNode(&queue,&Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id],compareTo));
+    enQueue(&queue,&Frame_Tbl[pcb->page_tbl->page_entry[pageNumber].frame_id]);
+    int physicalAddress = (pageNumber * PAGE_SIZE) + pageOffset;
     memoryAccess(action,pcb->page_tbl->page_entry[pageNumber].frame_id,pageOffset);
 
 }
@@ -83,26 +85,25 @@ void get_page(PCB *pcb, int page_id) {
         }
         if(frame->dirty == true) {
             frame->lock_count = 1;
-            siodrum(write,pcb,page_id,frame->frame_id);
+            siodrum(write,frame->pcb,frame->page_id,frame->frame_id);
             frame->dirty = false;
         }
-        PAGE_ENTRY *entry = &PTBR->page_entry[frame->page_id];
+        PAGE_ENTRY *entry = &frame->pcb->page_tbl->page_entry[frame->page_id];
         entry->valid = false;
     }
-    Frame_Tbl[frame->frame_id] = *frame;
     frame->lock_count = 1;
     frame->free = false;
     siodrum(read,pcb,page_id,frame->frame_id);
     frame->lock_count = 0;
     frame->pcb = pcb;
     frame->page_id = page_id;
-    frame->pcb->page_tbl->page_entry[frame->page_id].frame_id = frame->frame_id;
+    pcb->page_tbl->page_entry[page_id].frame_id = frame->frame_id;
 
 
     frame->dirty = false;
-    frame->pcb->page_tbl->page_entry[page_id].valid = true;
-    removeNode(&queue,findNode(&queue,&Frame_Tbl[frame->frame_id],*compareTo));
-    enQueueSorted(&queue,&Frame_Tbl[frame->frame_id],*compareTo);
+    pcb->page_tbl->page_entry[page_id].valid = true;
+    removeNode(&queue,findNode(&queue,&Frame_Tbl[frame->frame_id],compareTo));
+    enQueueSorted(&queue,&Frame_Tbl[frame->frame_id],compareTo);
 
 }
 int start_cost(PCB *pcb) {
@@ -113,12 +114,12 @@ void deallocate(PCB *pcb) {
     int i = 0;
     for(i = 0; i < MAX_PAGE; i++) {
         PAGE_ENTRY *page = &(pcb->page_tbl->page_entry[i]);
-        FRAME *frame = &Frame_Tbl[page->frame_id];
         if(page->valid == true){
+            FRAME *frame = &Frame_Tbl[page->frame_id];
             frame->pcb = NULL;
             frame->dirty = true;
             frame->page_id = 0;
-            removeNode(&queue,findNode(&queue,frame,*compareTo));
+            removeNode(&queue,findNode(&queue,frame,compareTo));
             frame->free = true;
         }
     }
